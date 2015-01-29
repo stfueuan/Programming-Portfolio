@@ -1,0 +1,39 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+
+#include "game_object.h"
+#include <iostream>
+
+class Player : public GameObject
+{
+public:
+	enum Anim
+	{
+		idle,
+		run,
+		attack,
+		attack2,
+		attack3,
+		block,
+		hurt,
+		death
+	};
+
+	void init();
+	void update();
+	bool invincible; 
+	Anim state;
+	bool jump;
+	float w; //bottom right corner
+	float h; //bottom left corner
+	float x; //top left corner
+	float y; //top right corner
+	int lives;
+
+private:
+	void react();
+	int timer;
+	float jump_frame;
+};
+
+#endif

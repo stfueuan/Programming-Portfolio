@@ -1,0 +1,154 @@
+#include "Enemy.h"
+#include <iostream>
+
+Enemy::Enemy()
+{
+
+}
+Enemy::~Enemy()
+{
+}
+
+void Enemy::init()
+{
+	state = run;
+	w = 125;
+	h = 150;
+	x = (GetX() - width()/2);
+	y = (GetY() - (height()/2 + 25));
+	death_frame =- 1.0;
+	set_uv_width(0.133f);
+	set_uv_height(0.166666666666666667f);
+	range = false;
+	attack_frame = 0;
+	attacks = false;	//am i currently attacking
+}
+
+void Enemy::AI()
+{
+	if (state == run)
+	{
+		move(-2.5f, 0);
+		Animate(0.532f, 5, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.0f));
+	}
+	else if (state == walk)
+	{
+		move(2.5f, 0);
+		Animate(0.532f, 5, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.0f));
+	}
+
+	if (state == attack)
+	{
+		attack_frame += (0.143/6);
+
+		Animate(0.532f, 6, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.1666666666666667f));
+
+		if(attack_frame > 0.429 && attack_frame < 0.582)
+		{
+			attacks = true;
+
+			if (attack_frame > 0.582)
+			{
+				attack_frame = 0;
+				attacks = false;
+			}
+		}	
+	}
+	else if (state == attack2)
+	{
+		attack_frame += (0.143/6);
+
+		Animate(0.858f, 6, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.33333333333333333333333333333f));
+
+		if(attack_frame > 0.582 && attack_frame < 0.858)
+		{
+			attacks = true;
+
+			if (attack_frame > 0.725)
+			{
+				attack_frame = 0;
+				attacks = false;
+			}
+		}		
+	}
+	else if (state == attack3)
+	{
+		attack_frame += (0.143/6);
+
+		Animate(0.532f, 6, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.5f));
+
+		if(attack_frame > 0.429f && attack_frame < 0.725)
+		{
+				attacks = true;
+
+			if (attack_frame > 0.572)
+			{
+				attack_frame = 0;
+				attacks = false;
+			}
+		}		
+	}
+	else if (state == block)
+	{
+		Animate(0.286f, 20, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.833333333333333333333333f));
+		state = run;
+	}
+	else if (state == death)
+	{
+		death_frame += 0.143f;
+
+		Animate (0.532f, 10, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.66666666666666666666666666f));
+
+		if(death_frame > 0.532f)
+		{
+			anim = true;
+
+			if (death_frame > 0.572)
+			{
+				death_frame = 0;
+				anim = false;
+			}
+		}
+	}
+
+	if (range == true)
+	{
+		if (state != attack && state != attack2 && state != attack3)
+		{
+			int temp = rand()%90;
+
+			if (temp < 30)
+			{
+				state = attack;
+			}
+			else if ((temp > 30) && (temp < 60))
+			{
+				state = attack2;
+			}
+			else
+			{
+				state = attack3;
+			}
+		}
+	}
+}
+
+void Enemy::react()
+{
+	if(rand()%100 < 50)
+	{
+		state = block;
+	}
+}
+
+void Enemy::update()
+{
+	AI();
+}

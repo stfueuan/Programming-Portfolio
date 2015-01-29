@@ -1,0 +1,18 @@
+﻿Build started 13/12/2013 15:29:53.
+     1>Project "E:\VITA CW\Vita Coursework 1\cw1_app.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "PSVita_Debug\cw1_app.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         Player.cpp
+         psp2snc.exe -D_DEBUG -o PSVita_Debug\Player.o -c -Xdepmode=1 -MD -Xmserrors -I..\abertay_framework -I"C:\Program Files\SCE\PSP2 SDKs\2.100\host_tools\build\include" -I"C:\Program Files\SCE\PSP2 SDKs\2.100\target\include" -I"C:\Program Files\SCE\PSP2 SDKs\2.100\target\include_common" -g -O0 "E:\VITA CW\Vita Coursework 1\Player.cpp"
+       Link:
+         C:\Program Files\SCE\PSP2 SDKs\2.100\host_tools\build\bin\psp2ld32.exe -o "E:\VITA CW\Vita Coursework 1\PSVita_Debug\cw1_app.self" -L"C:\Program Files\SCE\PSP2 SDKs\2.100\target\lib" --start-group PSVita_Debug\Enemy.o PSVita_Debug\game_object.o PSVita_Debug\main.o PSVita_Debug\Player.o PSVita_Debug\sprite_application.o "E:\VITA CW\Vita Coursework 1\PSVita_Debug\abertay_framework.a" "E:\VITA CW\Vita Coursework 1\PSVita_Debug\libpng.a" "E:\VITA CW\Vita Coursework 1\PSVita_Debug\zlib.a" "-lSceDbg_stub" "-lSceGxm_stub" "-lSceDisplay_stub" "-lSceCtrl_stub" "-lSceSysmodule_stub" "-lSceNgs_stub_weak" "-lSceAudio_stub" "-lSceTouch_stub" --end-group
+         cw1_app.vcxproj -> E:\VITA CW\Vita Coursework 1\PSVita_Debug\cw1_app.self
+       FinalizeBuildStatus:
+         Deleting file "PSVita_Debug\cw1_app.unsuccessfulbuild".
+         Touching "PSVita_Debug\cw1_app.lastbuildstate".
+     1>Done Building Project "E:\VITA CW\Vita Coursework 1\cw1_app.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.72

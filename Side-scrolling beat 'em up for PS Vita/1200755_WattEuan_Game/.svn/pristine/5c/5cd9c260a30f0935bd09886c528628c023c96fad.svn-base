@@ -1,0 +1,187 @@
+#include "sprite_application.h"
+#include <graphics/sprite_renderer.h>
+#include <system/platform.h>
+#include <iostream>
+#include <math.h>
+
+using namespace std;
+
+SpriteApplication::SpriteApplication(abfw::Platform* platform) :
+	abfw::Application(platform),
+	sprite_renderer_(NULL),
+	player_texture(NULL),
+
+controller_manager_(SCE_CTRL_MODE_DIGITALANALOG)
+{
+}
+
+SpriteApplication::~SpriteApplication()
+{
+}
+
+void SpriteApplication::Init()
+{
+	// load the font to draw the on-screen text
+	bool font_loaded = font_.Load("comic_sans", *platform_);
+	if(!font_loaded)
+	{
+		std::cout << "Font failed to load." << std::endl;
+		exit(-1);
+	}
+
+	png_loader.Load("tmnt4.png", *platform_, image_data);
+	player_texture = platform_->CreateTexture(image_data);
+
+	png_loader.Load("Shredder.png", *platform_, image_data);
+	enemy_texture = platform_->CreateTexture(image_data);
+
+	// create a sprite renderer to draw the sprites
+	sprite_renderer_ = platform_->CreateSpriteRenderer();
+
+	//
+	// initialise the sprite properties
+	//
+	player.init();
+	player.set_height(488.0f);
+	player.set_width(356.0f);
+	player.set_position(abfw::Vector3(250.0f, 175.0f, 0.0f));
+	player.set_texture(player_texture);
+	player.set_uv_width(0.08f);
+	player.set_uv_height(0.143f);
+
+	enemy.init();
+	enemy.set_height(305.0f);
+	enemy.set_width(332.5f);
+	enemy.set_position(abfw::Vector3(600.0f, 300.0f, 0.0f));
+	enemy.set_texture(enemy_texture);
+	enemy.set_uv_width(0.133f);
+	//enemy.set_uv_height(0.17568f);
+	enemy.set_uv_height(0.166666666666666667f);
+
+	//used for background image - will parallax scroll eventually
+	game_object_.set_height(544);
+	game_object_.set_width(1920);
+	game_object_.set_position(abfw::Vector3(platform_->width(), platform_->height()*0.5f, 0.0f));
+	game_object_.set_colour(0xff000000);
+
+	game_object_2.set_height(544);
+	game_object_2.set_width(1920);
+	game_object_2.set_position(abfw::Vector3(platform_->width()*3.0f, platform_->height()*0.5f, 0.0f));
+	game_object_2.set_colour(0xffff0000);
+
+	collision = false;
+	enemy.range = false;
+}
+
+void SpriteApplication::CleanUp()
+{
+	// free up the sprite renderer
+	delete sprite_renderer_;
+	sprite_renderer_ = NULL;
+
+	delete player_texture;
+	player_texture = NULL;
+}
+
+bool SpriteApplication::Update(float ticks)
+{
+	// calculate the frame rate
+	frame_rate_ = 1.0f / ticks;
+	srand(time(NULL));
+	controller_manager_.Update();
+
+	Rebound();
+
+	player.update();
+	enemy.update();
+	
+	if(controller_manager_.buttons_down() & SCE_CTRL_SQUARE) //use buttons_released to calculate what's needed
+	{
+		player.state = player.attack;
+		enemy.react();
+	}
+	else if(controller_manager_.buttons_down() & SCE_CTRL_TRIANGLE)
+	{
+		player.state = player.attack2;
+		enemy.react();
+	}
+	else if(controller_manager_.buttons_down() & SCE_CTRL_CIRCLE)
+	{
+		player.state = player.attack3;
+		enemy.react();
+	}
+	else if(controller_manager_.buttons_down() & SCE_CTRL_CROSS)
+	{
+		player.state = player.block;
+		enemy.react();
+	}
+	else if(controller_manager_.buttons_down() & SCE_CTRL_RIGHT)
+	{
+		player.state = player.run;
+		enemy.velocity.x = -2;
+		game_object_.move(-2, 0);
+		game_object_2.move(-2, 0);
+	}
+	else if(controller_manager_.buttons_down() & SCE_CTRL_LEFT)
+	{
+		player.state = player.run;
+		enemy.velocity.x = 2;
+		game_object_.move(2, 0);
+		game_object_2.move(2, 0);
+	};
+
+	bool game_running = true;
+	if (controller_manager_.buttons_down() & (SCE_CTRL_START | SCE_CTRL_SELECT) == (SCE_CTRL_START | SCE_CTRL_SELECT))
+		game_running = false;
+	return game_running;
+}
+
+void SpriteApplication::Render()
+{
+	// set up sprite renderer for drawing
+	sprite_renderer_->Begin();
+
+	//
+	// draw all sprites here
+	//
+	sprite_renderer_->DrawSprite(game_object_);
+	sprite_renderer_->DrawSprite(game_object_2);
+	sprite_renderer_->DrawSprite(enemy);
+	sprite_renderer_->DrawSprite(player);
+
+	font_.RenderText(sprite_renderer_, abfw::Vector3(10.0f, 5.0f, -0.9f), 1.0f, 0xff0000ff, abfw::TJ_LEFT, "My First Sprite Application");
+	font_.RenderText(sprite_renderer_, abfw::Vector3(850.0f, 510.0f, -0.9f), 1.0f, 0xff00ffff, abfw::TJ_LEFT, "FPS: %.1f", frame_rate_);
+
+	// tell sprite renderer that all sprites have been drawn
+	sprite_renderer_->End();
+}
+
+void SpriteApplication::Rebound()
+{
+	if(enemy.position().x <= player.position().x + 220)
+	{
+		enemy.range = true;
+	}
+
+	//bounding circle collision
+	//int x_collide = (game_object_.position().x - game_object_.position().x);
+	//int y_collide = (game_object_.position().y - game_object_.position().y);
+	//int r = (game_object_.radius + game_object_.radius);
+
+	//if (((x_collide^2) + (y_collide^2)) < (r^2));
+	//{
+	//	collision == true;
+	//}
+
+	//going to be used for background scrolling - screen bounding
+	//when one objects right side hits the left/right of the screen then it jumps to meet other side of second object
+	if (game_object_.position().x + (game_object_.width()/2) < 0)
+	{
+		game_object_.set_position(abfw::Vector3(platform_->width()*3.0f, game_object_.position().y, 0.f)); //shift black to blue start pos
+	}
+
+	if (game_object_2.position().x + (game_object_2.width()/2) < 0)
+	{
+		game_object_2.set_position(abfw::Vector3(platform_->width()*3.0f, game_object_2.position().y, 0.f)); //shift blue back to start pos
+	}
+}

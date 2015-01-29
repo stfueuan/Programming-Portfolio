@@ -1,0 +1,89 @@
+#include "Player.h"
+
+void Player::init()
+{
+	state = idle;
+}
+
+void Player::collide() //do I need this?
+{
+	//collide with 
+}
+
+void Player::react()
+{
+	invincible = true;
+	//reaction to getting hurt - change alpha value to flash sprite and change colour to red, set hit box to null for certian time, knockback
+}
+
+void Player::update()
+{
+	if(state == idle) //obviously not acting like a boolean value, but how to solve without them?
+	{
+		Animate(0.9f, 5, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.0f));
+	}
+	else if (state == run)
+	{
+		Animate(0.7f, 5, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.143f)); //could change y value to variable
+
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == attack)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.286f));
+
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == attack2)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.429f));
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == attack3)
+	{
+		Animate(0.8f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.572f));
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == block)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.715f));
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == hurt)
+	{
+		react();
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == death)
+	{
+		set_uv_position(abfw::Vector2(texture_x, 0.858f));
+	}
+}

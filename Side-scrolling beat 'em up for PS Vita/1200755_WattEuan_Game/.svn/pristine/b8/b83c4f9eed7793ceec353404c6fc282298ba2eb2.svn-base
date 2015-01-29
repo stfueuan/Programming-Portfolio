@@ -1,0 +1,54 @@
+#ifndef _SPRITE_APPLICATION_H
+#define _SPRITE_APPLICATION_H
+
+#include <system/application.h>
+#include "game_object.h"
+#include <graphics/font.h>
+#include <input/vita/controller_input_manager_vita.h>
+#include <graphics\texture.h>
+#include <graphics\image_data.h>
+#include <system/png_loader.h>
+#include <system/file.h>
+#include <vector>
+#include "Player.h"
+#include "Enemy.h"
+
+namespace abfw
+{
+	class Platform;
+	class PNGLoader;
+	class ImageData;
+}
+
+class SpriteApplication : public abfw::Application
+{
+public:
+	SpriteApplication(abfw::Platform* platform);
+	~SpriteApplication();
+	void Init();
+	void CleanUp();
+	bool Update(float ticks);
+	void Render();
+	void Collide();
+
+private:
+	abfw::ControllerInputManagerVita controller_manager_;
+	GameObject game_object_;
+	GameObject game_object_2;
+	GameObject game_object_3;
+	GameObject game_object_4;
+	Player player;
+	abfw::Font font_;
+	abfw::SpriteRenderer* sprite_renderer_;
+	abfw::PNGLoader png_loader;
+	abfw::ImageData image_data;
+	abfw::Texture* player_texture;
+	abfw::Texture* enemy_texture;
+	abfw::Texture* background_texture;
+	float frame_rate_;
+	float death_frame;
+	bool collision;
+	std::vector<Enemy> enemy;
+};
+
+#endif // _SPRITE_APPLICATION_H

@@ -1,0 +1,69 @@
+#include "Enemy.h"
+#include <iostream>
+
+void Enemy::init()
+{
+	state = run;
+}
+
+void Enemy::AI()
+{
+	if (state == run)
+	{
+		move(-3, 0);
+		Animate(0.532f, 5, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.0f));
+	}
+	else if (state == attack)
+	{
+		Animate(0.532f, 10, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.1666666666666667f));
+		state = run;
+	}
+	else if (state == attack2)
+	{
+		Animate(0.858f, 6, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.33333333333333333333333333333f));
+		state = run;
+	}
+	else if (state == attack3)
+	{
+		Animate(0.532f, 6, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.5f));
+		state = run;
+	}
+	else if (state == block)
+	{
+		Animate(0.286f, 20, 0.143f);
+		set_uv_position(abfw::Vector2(texture_x, 0.833333333333333333333333f));
+		state = run;
+	}
+	else if (state == death)
+	{
+	}
+
+	if (range == true)
+	{
+		if (rand()%100 < 50)
+		{
+			state = attack;
+		}
+		else
+		{
+			state = attack2;
+		}
+	}
+}
+
+void Enemy::react()
+{
+	if(rand()%100 < 50)
+	{
+		state = block;
+	}
+}
+
+void Enemy::update()
+{
+	AI();
+}

@@ -1,0 +1,123 @@
+#include "Player.h"
+
+void Player::init()
+{
+	state = idle;
+}
+
+void Player::collide() //do I need this?
+{
+	//collide with 
+}
+
+void Player::react()
+{
+	invincible = true;
+
+	frame_update++;
+
+	//doesn't yet work
+	/*if (frame_update < 5)
+	{
+		if (rand()%100 < 50)
+		{
+			set_colour(0xff0000ff);
+		}
+		else 
+		{
+			set_colour(0xff000000);
+		}
+	}
+	else 
+	{
+		set_colour(0x00000000);
+	}*/
+	//reaction to getting hurt - change alpha value to flash sprite and change colour to red, set hit box to null for certian time, knockback
+}
+
+void Player::update()
+{
+	if(state == idle)
+	{
+		Animate(0.9f, 5, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.0f));
+	}
+	else if (state == run)
+	{
+		Animate(0.7f, 5, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.143f));
+
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == attack)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.286f));
+
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == attack2)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.429f));
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == attack3)
+	{
+		jump = false;
+		int jump_frame = 0;
+		jump_frame += 0.083;
+
+		Animate(0.8f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.572f));
+
+		if(0.083 < jump_frame < 0.581)
+		{
+			jump = true;
+
+			if (jump_frame > 0.581)
+			{
+				jump_frame = 0;
+				jump = false;
+			}
+		}
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == block)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.715f));
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == hurt)
+	{
+		react();
+		
+		if(!anim)
+		{
+			state = idle;
+		}
+	}
+	else if(state == death)
+	{
+		set_uv_position(abfw::Vector2(texture_x, 0.858f));
+	}
+}

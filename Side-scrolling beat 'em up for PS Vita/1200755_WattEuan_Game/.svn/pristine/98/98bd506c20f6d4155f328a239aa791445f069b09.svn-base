@@ -1,0 +1,31 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+
+#include "game_object.h"
+#include <iostream>
+
+class Player : public GameObject
+{
+public:
+	enum Anim
+	{
+		idle,
+		run,
+		attack,
+		attack2,
+		attack3,
+		block,
+		hurt,
+		death
+	};
+
+	void init();
+	void update();
+	bool invincible; //set hit box to null and flash sprite between transparent and visible and maybe change sprite colour red
+	Anim state;
+	bool jump;
+	void collide();
+	void react();
+};
+
+#endif

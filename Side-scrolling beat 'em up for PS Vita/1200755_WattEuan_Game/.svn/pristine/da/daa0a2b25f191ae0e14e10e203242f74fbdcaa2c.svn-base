@@ -1,0 +1,135 @@
+#include "Player.h"
+
+void Player::init()
+{
+	invincible = false;
+	state = idle;
+	timer = 0;
+	jump_frame = 0;
+	lives = 3;
+}
+
+void Player::apply_damage()
+{
+	lives -= 1;
+	if (lives < 0) 
+	{
+		lives = 0;
+		state = death;
+	}
+}
+
+void Player::react()
+{
+	timer++;
+
+	if (timer < 120)
+	{
+		if (timer%10)
+		{
+			set_colour(0xff0000ff);
+		}
+		else 
+		{
+			set_colour(0x00000000);
+		}
+	}
+	else
+	{
+		set_colour(0xffffffff);
+		invincible = false;
+		timer = 0;
+		state = idle;
+	}
+	//reaction to getting hurt - change alpha value to flash sprite and change colour to red, set hit box to null for certian time
+}
+
+void Player::update()
+{
+	std::cout << lives << std::endl; //take this out
+
+	if(state == idle)
+	{
+		Animate(0.9f, 5, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.0f));
+		y = GetY() + 75;
+		w = 140;
+		h = 180;
+	}
+	else if (state == run)
+	{
+		Animate(0.7f, 8, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.143f));
+		x = GetX() - (width()/2);
+		y = GetY() + 75;
+		w = 140;
+		h = 180;
+	}
+	else if(state == attack)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.286f));
+		x = GetX() - (width()/2);
+		y = GetY() + 60;
+		w = 300;
+		h = 240;
+	}
+	else if(state == attack2)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.429f));
+		x = GetX() - (width()/2);
+		y = GetY() + 50;
+		w = 300;
+		h = 200;
+	}
+	else if(state == attack3)
+	{
+		jump_frame += (0.083/6);
+
+		Animate(0.8f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.572f));
+		x = GetX() - (width()/2);
+		y = GetY() - (height()/2 + 15);
+		w = 280;
+		h = 400;
+
+		if((jump_frame > 0.083) && (jump_frame < 0.581))
+		{
+			jump = true;
+
+			if (jump_frame > 0.581)
+			{
+				jump_frame = 0;
+				jump = false;
+			}
+		}
+	}
+	else if(state == block)
+	{
+		Animate(0.581f, 6, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.715f));
+		x = GetX() - (width()/2);
+		y = GetY() - (height()/2 + 15);
+		w = 260;
+		h = 400;
+	}
+	else if(state == hurt)
+	{
+		if (invincible)
+		{
+			react();
+			Animate(0.9f, 5, 0.083f);
+			set_uv_position(abfw::Vector2(texture_x, 0.0f));
+		}
+	}
+	else if(state == death)
+	{
+		Animate(0.9f, 5, 0.083f);
+		set_uv_position(abfw::Vector2(texture_x, 0.858f));
+	}
+	else
+	{
+		state = idle;
+	}
+}

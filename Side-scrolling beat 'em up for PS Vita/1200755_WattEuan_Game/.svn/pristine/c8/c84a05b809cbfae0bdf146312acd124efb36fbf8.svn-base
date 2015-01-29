@@ -1,0 +1,36 @@
+#ifndef ENEMY_H
+#define ENEMY_H
+
+#include "game_object.h"
+
+class Enemy : public GameObject
+{
+public:
+	Enemy();
+	~Enemy();
+
+	enum Anim
+	{
+		run,
+		attack,
+		attack2,
+		attack3,
+		block,
+		death
+	};
+
+	void init();
+	void update();
+	void react(); //put knock back here
+	bool range; //determines whether the enemy is within attack range of the player
+	Anim state;
+	float w; //bottom right corner
+	float h; //bottom left corner
+	float x; //top left corner
+	float y; //top right corner
+	float centre; //centre of collision rectangle
+private:
+	void AI();
+};
+
+#endif
