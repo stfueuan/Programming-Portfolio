@@ -1,0 +1,38 @@
+// Filename: texture.ps
+
+Texture2D texture0 : register(t0);
+SamplerState Sampler0 : register(s0);
+
+cbuffer Alpha
+{
+	float getAlpha;
+	float3 padding;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+	float3 normal : NORMAL;
+};
+
+
+float4 TexturePixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+	
+    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+	if(getAlpha == 0)
+	{
+		//sample full colour range of texture
+		textureColor = texture0.Sample(Sampler0, input.tex);
+	}
+	else
+	{
+		//sample only the red channel to get a greyscale texture
+		textureColor = texture0.Sample(Sampler0, input.tex).r;
+	}
+
+    return textureColor;
+}
+

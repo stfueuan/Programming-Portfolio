@@ -1,0 +1,152 @@
+Texture2D displacementTexture : register(t0);
+SamplerState LinearSampler : register(s0);
+
+#define NO_OF_LIGHTS 8
+
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+struct ConstantOutputType
+{
+    float edges[4] : SV_TessFactor;
+    float inside[2] : SV_InsideTessFactor;
+};
+
+struct HullOutputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+	float3 normal : NORMAL;
+	float3 tangent : TANGENT;
+	float3 binormal : BINORMAL;
+	float3 viewDirection : TEXCOORD1; 
+	float3 lightDir[NO_OF_LIGHTS] : TEXCOORD2;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+	float3 normal : NORMAL;
+	float3 tangent : TANGENT;
+	float3 binormal : BINORMAL;
+	float3 viewDirection : TEXCOORD1; 
+	float3 lightDir[NO_OF_LIGHTS] : TEXCOORD2;
+};
+
+float3 CalculateNewNormals(PixelInputType output, float3 vertexPosition, float tessellationAmount)
+{
+	float3 calculatedNormal = normalize(output.normal);
+
+	//Sample the texture at the nearest vertex locations
+	float northPixelHeight = displacementTexture.SampleLevel(LinearSampler, float2(output.tex.x, output.tex.y + 1.0f/tessellationAmount), 0.0f).r; //get one vertex up from current for height
+	float southPixelHeight = displacementTexture.SampleLevel(LinearSampler, float2(output.tex.x, output.tex.y - 1.0f/tessellationAmount), 0.0f).r; //get one vertex down from current for height
+	float eastPixelHeight = displacementTexture.SampleLevel(LinearSampler, float2(output.tex.x + 1.0f/tessellationAmount, output.tex.y), 0.0f).r; //get one vertex right from current for height
+	float westPixelHeight = displacementTexture.SampleLevel(LinearSampler, float2(output.tex.x - 1.0f/tessellationAmount, output.tex.y), 0.0f).r; //get one vertex left from current for height
+
+	//Get the height of the newly sampled vertices
+	float3 northPixelHeightPos = float3(vertexPosition.x, vertexPosition.y + 1.0f/tessellationAmount, vertexPosition.z);
+	float3 southPixelHeightPos = float3(vertexPosition.x, vertexPosition.y - 1.0f/tessellationAmount, vertexPosition.z);
+	float3 eastPixelHeightPos = float3(vertexPosition.x + 1.0f/tessellationAmount, vertexPosition.y, vertexPosition.z);
+	float3 westPixelHeightPos = float3(vertexPosition.x - 1.0f/tessellationAmount, vertexPosition.y, vertexPosition.z);
+
+	//Displace the sampled vertices using the new heights
+	northPixelHeightPos += northPixelHeight * calculatedNormal;
+	southPixelHeightPos -= southPixelHeight * calculatedNormal;
+	eastPixelHeightPos += eastPixelHeight * calculatedNormal;
+	westPixelHeightPos -= westPixelHeight * calculatedNormal;
+
+	//Get vectors from the points above - this will give a base to get the normal from by giving us the gradient of our current vertex
+	float3 northSouth = northPixelHeightPos - southPixelHeightPos;
+	float3 eastWest = eastPixelHeightPos - westPixelHeightPos;
+
+	//Lets get the cross product of these to get the perpindicular normal
+	float3 normal = cross(northSouth, eastWest);
+	calculatedNormal = normalize(normal);
+
+	return calculatedNormal;
+}
+
+[domain("quad")]
+
+PixelInputType ColorDomainShader(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, const OutputPatch<HullOutputType, 4> patch)
+{
+    float4 vertexPosition;
+	float2 textureUV;
+	float3 normal;
+	float3 tangent;
+	float3 binormal;
+	float3 viewDir;
+	float3 lightDirection;
+    PixelInputType output;
+
+	// Determine the position of the new vertex. Bilinear interpolation
+    float4 v1 = lerp(patch[0].position, patch[1].position, 1-uvwCoord.y);
+    float4 v2 = lerp(patch[2].position, patch[3].position, 1-uvwCoord.y);
+    vertexPosition = lerp(v1, v2, uvwCoord.x);
+
+    // Determine the new texture coordinate
+	float2 tex1 = lerp(patch[0].tex, patch[1].tex, 1-uvwCoord.y);
+    float2 tex2 = lerp(patch[2].tex, patch[3].tex, 1-uvwCoord.y);
+    textureUV = lerp(tex1, tex2, uvwCoord.x);
+	output.tex = textureUV;
+
+	// Determine the new normal
+	float3 norm1 = lerp(patch[0].normal, patch[1].normal, 1-uvwCoord.y);
+    float3 norm2 = lerp(patch[2].normal, patch[3].normal, 1-uvwCoord.y);
+    normal = lerp(norm1, norm2, uvwCoord.x);
+	output.normal = normal;
+
+	// Determine the new tangent
+	float3 tang1 = lerp(patch[0].tangent, patch[1].tangent, 1-uvwCoord.y);
+    float3 tang2 = lerp(patch[2].tangent, patch[3].tangent, 1-uvwCoord.y);
+    tangent = lerp(tang1, tang2, uvwCoord.x);
+	output.tangent = tangent;
+	
+	// Determine the new binormal
+	float3 binorm1 = lerp(patch[0].binormal, patch[1].binormal, 1-uvwCoord.y);
+    float3 binorm2 = lerp(patch[2].binormal, patch[3].binormal, 1-uvwCoord.y);
+    binormal = lerp(binorm1, binorm2, uvwCoord.x);
+	output.binormal = binormal;
+
+	// Recalculate normals for displacement map
+	normal = CalculateNewNormals(output, vertexPosition.xyz, input.edges[0]); 
+
+	// Calculate the position of the new vertex against the world, view, and projection matrices.
+	output.position = mul(vertexPosition, worldMatrix); 
+
+	// Find the height of the vertex from the texture and displace the vertex along the normal
+	// Basic premise taken from Frank Luna's book, Introduction to 3D Game Programming with DirectX 11, chapter 18 page 510
+	float height = displacementTexture.SampleLevel(LinearSampler, output.tex, 0.0f).r / 10.0f; //15 is the standard division here, but for the current texture 10 works well
+	vertexPosition.xyz += height * normalize(output.normal);
+	
+	// Calculate output position against world, view and projection matrices
+	output.position = vertexPosition; 
+	output.position = mul(output.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+
+	// Determine the new viewDirection
+	float3 vd1 = lerp(patch[0].viewDirection, patch[1].viewDirection, 1-uvwCoord.y);
+	float3 vd2 = lerp(patch[2].viewDirection, patch[3].viewDirection, 1-uvwCoord.y);
+	viewDir = lerp(vd1, vd2, uvwCoord.x);
+	output.viewDirection = viewDir;
+
+	// Find the new light directions
+	for(int i = 0; i < NO_OF_LIGHTS; i++)
+	{
+		float3 ld1 = lerp(patch[0].lightDir[i], patch[1].lightDir[i], 1-uvwCoord.y);
+		float3 ld2 = lerp(patch[2].lightDir[i], patch[3].lightDir[i], 1-uvwCoord.y);
+		lightDirection = lerp(ld1, ld2, uvwCoord.x);
+		output.lightDir[i] = lightDirection;
+	}
+
+	output.normal = normal; //this needs to be done as output.normal (before recalculation can be done) needs to be used for moving the vertices with the displacement map
+
+    return output;
+}
+

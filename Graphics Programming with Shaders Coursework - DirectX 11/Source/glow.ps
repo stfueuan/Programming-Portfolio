@@ -1,0 +1,46 @@
+// Filename: glow.ps
+
+
+Texture2D texture0[2] : register(t0);
+SamplerState Sampler0 : register(s0);
+
+cbuffer GlowType
+{
+	float glowType;
+	float padding;
+};
+
+cbuffer BloomVariables
+{
+	float bloomIntensity = 1.3f;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+	float3 normal : NORMAL;
+};
+
+
+float4 TexturePixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor, bloomTextureColor, normalTextureColor;
+
+	if(glowType == 0)
+	{
+		//Multiplying textures gives a darker, night time feel
+		textureColor = texture0[0].Sample(Sampler0, input.tex) * texture0[1].Sample(Sampler0, input.tex);
+	}
+	else
+	{
+		// Add the greyscale and full colour textures together to give glow effect - bling style!
+		bloomTextureColor = texture0[1].Sample(Sampler0, input.tex);
+		normalTextureColor = texture0[0].Sample(Sampler0, input.tex);
+		textureColor = normalTextureColor + bloomTextureColor;
+	}
+   
+
+    return textureColor;
+}
+

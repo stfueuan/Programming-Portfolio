@@ -1,0 +1,42 @@
+Texture2D shaderTexture;
+SamplerState SampleType;
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float2 texCoord1 : TEXCOORD1;
+    float2 texCoord2 : TEXCOORD2;
+    float2 texCoord3 : TEXCOORD3;
+    float2 texCoord4 : TEXCOORD4;
+    float2 texCoord5 : TEXCOORD5;
+  
+};
+
+float4 VerticalBlurPixelShader(PixelInputType input) : SV_TARGET
+{
+    float weight0, weight1, weight2;
+    float normalization;
+    float4 color;
+
+	// Create the weights that each neighbor pixel will contribute to the blur.
+	weight0 = 0.6f;
+    weight1 = 0.3f;
+    weight2 = 0.1f;
+
+    // Initialize the color to black.
+    color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // Add the five vertical pixels to the color by the specific weight of each.
+    color += shaderTexture.Sample(SampleType, input.texCoord1) * weight2;
+    color += shaderTexture.Sample(SampleType, input.texCoord2) * weight1;
+    color += shaderTexture.Sample(SampleType, input.texCoord3) * weight0;
+    color += shaderTexture.Sample(SampleType, input.texCoord4) * weight1;
+    color += shaderTexture.Sample(SampleType, input.texCoord5) * weight2;
+ 
+    // Set the alpha channel to one.
+    color.a = 1.0f;
+
+    return color;
+}
+

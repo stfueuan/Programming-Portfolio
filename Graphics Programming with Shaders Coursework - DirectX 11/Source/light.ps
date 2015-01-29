@@ -1,0 +1,118 @@
+Texture2D shaderTexture[2] : register(t0);
+SamplerState SampleType : register(s0);
+
+#define NO_OF_LIGHTS 8
+
+cbuffer LightBuffer : register(cb0)
+{
+    float4 diffuseColor[NO_OF_LIGHTS];
+    float4 lightDirection[NO_OF_LIGHTS];
+	float4 specularPower[NO_OF_LIGHTS];
+	float4 ambientColor[NO_OF_LIGHTS];
+	float4 specularColor[NO_OF_LIGHTS];
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+	float3 tangent : TANGENT;
+	float3 binormal : BINORMAL;
+	float3 viewDirection : TEXCOORD1; 
+	float3 lightDir[NO_OF_LIGHTS] : TEXCOORD2;
+};
+
+float attenuation(float distance, float constf, float linf, float quadf)
+{
+	float atten = 1.0/(constf + linf*distance + quadf*(distance*distance));
+
+	return atten;
+}
+
+float4 LightPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+    float lightIntensity = 0.0f;
+    float4 color[NO_OF_LIGHTS];
+	float4 finalColor = 0;
+	float3 reflection;
+	float4 specular;
+	float4 finalSpec[NO_OF_LIGHTS];
+	float range = 25.0f;
+	float3 normalizedLD = float3(0.0, 0.0, 0.0);
+	float dist;
+	float4 bumpMap;
+	float3 bumpNormal;
+
+	//Sample the bump map and get the new normal in the RGB values at each pixel, RGB = XYZ
+	//Basic premise taken from Frank Luna's book, Introduction to 3D Game Programming with DirectX 11, Chapter 18 page 501
+	bumpMap = shaderTexture[1].Sample(SampleType, input.tex);
+	bumpMap = (bumpMap * 2.0f) - 1.0f; //alter range from (0, 1) to (-1, 1)
+	bumpNormal = input.normal + (bumpMap.x * input.tangent) + (bumpMap.y * input.binormal); //Normal calculation taken from here, http://en.wikibooks.org/wiki/DirectX/10.0/Direct3D/Bump_Mapping, accessed on 28 November 2014
+	bumpNormal = normalize(bumpNormal); //since I use flat bumpMaps for some objects, I can replace input.normal below with bumpNormal
+
+	for(int i = 0; i < NO_OF_LIGHTS; i++)
+	{
+		// Give initial values to finalSpec
+		finalSpec[i].xyz = 0.0f;
+		finalSpec[i].w = 1.0f;
+
+		// All light contribute to ambient, thus divide by number of lights
+		color[i] = ambientColor[i] / (float)NO_OF_LIGHTS;
+				
+		//Calculate length of lightDir vector
+		dist = length(input.lightDir[i]);
+
+		// Check if pixel is in the range for light interaction
+		if(dist < range)
+		{
+			//normalise light direction
+			normalizedLD = normalize(input.lightDir[i]);
+
+			// Calculate the amount of light on this pixel.
+			lightIntensity = saturate(dot(bumpNormal, -normalizedLD));
+
+			//check if light is actually bright
+			if(lightIntensity > 0.0f)
+			{
+				// Determine the final amount of diffuse color based on the diffuse color combined with the light intensity.
+				color[i] = saturate(diffuseColor[i] * lightIntensity);
+
+				// Calculate light fall-off
+				float atten = attenuation(dist, 1.0f, 0.125f, 0.0f);
+
+				// Saturate pixel colour with attenuation value
+				color[i] = saturate(color[i] * atten);
+
+				// calculate the reflection vector
+				reflection = reflect(normalizedLD, bumpNormal);
+
+				// Determine the amount of specular light based on the reflection vector, viewing direction, and specular power
+				specular = pow(saturate(dot(reflection, input.viewDirection)), specularPower[i].x);
+
+				// sum up specular light
+				finalSpec[i] = specularColor[i] * specular;
+			}
+		}	
+	}
+
+	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
+	textureColor = shaderTexture[0].Sample(SampleType, input.tex);
+
+	for (i = 0; i < NO_OF_LIGHTS; i++)
+	{
+		finalColor += saturate(color[i]);
+	}
+
+	// Add the texture colour to the light colour
+	finalColor = finalColor * textureColor;
+
+	// Add the specular component last to the output color
+	for (i = 0; i < NO_OF_LIGHTS; i++)
+	{
+		finalColor += saturate(finalSpec[i]);
+	}
+
+    return finalColor;
+}
