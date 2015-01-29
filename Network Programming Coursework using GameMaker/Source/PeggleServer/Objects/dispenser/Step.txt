@@ -1,0 +1,2 @@
+image_angle = point_direction(x, y, mouse_x, mouse_y); //point cannon towards current mouse position
+clamp(image_angle, 250, 70); //force cannon rotation angle to be between 250 (min) and 70 (max) degrees

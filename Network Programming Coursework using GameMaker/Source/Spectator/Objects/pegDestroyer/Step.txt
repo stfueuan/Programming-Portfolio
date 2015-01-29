@@ -1,0 +1,35 @@
+gravity = 0.1; //10 m/s converted to pixels from meters (server details pixels to meters at 0.1)
+gravity_direction = 270; //down, in degrees apparently
+
+//force ball to within room bounds
+if(x > room_width)
+{
+    x = room_width  - 10;
+}
+
+if(x < 0)
+{
+    x = 0 + 10;
+}
+
+//destroy ball if off bottom of screen
+if(y > room_height)
+{
+    instance_destroy();
+}
+
+//destroy peg if conditions allow
+if(pegCollision && collisionOccuring)
+{
+    if(pegDestroyer.collisionIndex != 15) //don't destroy yourself...
+    {
+        with(pegDestroyer.collisionIndex) 
+        {
+            instance_destroy();
+        }
+    }
+    
+    collisionOccuring = false;
+    pegCollision = false;
+}
+

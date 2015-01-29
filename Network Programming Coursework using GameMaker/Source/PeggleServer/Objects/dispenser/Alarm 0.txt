@@ -1,0 +1,13 @@
+var buffer = peggleServer.Buffer;
+var socketList = peggleServer.SocketList;
+
+buffer_seek(buffer, buffer_seek_start, 0);
+buffer_write(buffer, buffer_u8, 4); //message ID
+buffer_write(buffer, buffer_u32, dispenser.image_angle); //where is the cannon pointing?
+buffer_write(buffer, buffer_u32, current_time); //current server time
+for(var i = 0; i < ds_list_size(socketList); i++)
+{
+    ReceivedPacket(buffer, ds_list_find_value(socketList, i));
+}
+
+alarm[0] = room_speed/5; //reset alarm timer

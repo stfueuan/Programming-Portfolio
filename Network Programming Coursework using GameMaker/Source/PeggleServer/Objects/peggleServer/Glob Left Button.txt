@@ -1,0 +1,26 @@
+var balls = instance_number(pegDestroyer); //get number of balls on screen
+
+var buffer = peggleServer.Buffer;
+var socketList = peggleServer.SocketList;
+
+if(balls < 1)
+{
+    with(instance_create(dispenser.x, dispenser.y, pegDestroyer)) //create instance and use its local variables in this block
+    {
+        physics_apply_impulse(dispenser.x, dispenser.y, lengthdir_x(100, point_direction(x, y, mouse_x, mouse_y)), lengthdir_y(100, point_direction(x, y, mouse_x, mouse_y)));
+        
+        for(var i = 0; i < ds_list_size(socketList); i++)
+        {        
+            buffer_seek(buffer, buffer_seek_start, 0);
+            buffer_write(buffer, buffer_u8, 3); //message ID
+            buffer_write(buffer, buffer_string, "pegDestroyer"); //send ball name
+            buffer_write(buffer, buffer_u32, x); //send initial x position
+            buffer_write(buffer, buffer_u32, y); //send initial y position
+            buffer_write(buffer, buffer_u32, dispenser.image_angle); //send direction of motion 
+            buffer_write(buffer, buffer_u32, phy_speed); //send intitial speed as dictated by box2D
+            buffer_write(buffer, buffer_u32, current_time); //send current server time
+            ReceivedPacket(buffer, ds_list_find_value(socketList, i));
+        }
+    }
+}
+ 

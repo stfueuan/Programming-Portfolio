@@ -1,0 +1,4 @@
+//networking stuff must be cleaned up like pointers
+network_destroy(Server);
+buffer_delete(Buffer);
+ds_list_destroy(SocketList);

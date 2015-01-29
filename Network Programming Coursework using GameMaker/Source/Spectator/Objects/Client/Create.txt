@@ -1,0 +1,29 @@
+var Type, IPAddress, Port;
+Type = network_socket_tcp; //create a TCP socket
+IPAddress = "127.0.0.1"; //Connect to 'this' pc
+Port = 5555;
+Socket = network_create_socket(Type); //create the socket...
+isConnected = network_connect(Socket, IPAddress, Port); //are we connected?
+
+var Size, Type, Alignment;
+Size = 1024; //set original size of buffer
+//buffer cannot change size
+//other types include buffer_grow (grows to include info above size in bytes but permantly stays at the new size)
+//buffer_wrap (information exceeding size will overwrite first elements
+//buffer_fast (stripped down buffer_fixed to only allow buffer_u8 and buffer_s8 read/write types - very little overhead)
+Type = buffer_fixed; 
+Alignment = 1; //...?
+Buffer = buffer_create(Size, Type, Alignment); //create the buffer detailed above
+
+//Ask the server for the current time, for synchronisation 
+intialTime = current_time;
+buffer_seek(Buffer, buffer_seek_start, 0);
+buffer_write(Buffer, buffer_u8, 1); //message ID
+buffer_write(Buffer, buffer_u32, current_time);
+network_send_packet(Socket, Buffer, buffer_tell(Buffer)); 
+
+//other necessary variables
+MSGID = 0;
+latency = 0;
+delta = 0;
+newServerTime = 0;

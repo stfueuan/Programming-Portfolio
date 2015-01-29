@@ -1,0 +1,9 @@
+Basic networking is working.
+
+Next up: sending game data.
+
+Rate at which to send -- 60 packets per second is overkill. Send slower and interpolate.
+
+Send *really* slowly -- since it's only a spectator -- and do everything through projection/interpolation?
+
+Quadratic prediction should be enough.

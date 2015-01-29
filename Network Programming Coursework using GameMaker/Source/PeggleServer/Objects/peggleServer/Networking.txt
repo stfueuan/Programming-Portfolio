@@ -1,0 +1,26 @@
+//REMEMBER: Client's async_map 'id' will return TCP or UDP socket, Server's async_map 'id' will return the socket of the client
+
+var type_event = ds_map_find_value(async_load, "type"); //async_load retrieves the type of event from the information being received
+switch(type_event){
+case network_type_connect:
+    var socket = ds_map_find_value(async_load, "socket"); //get the socket ID
+    ds_list_add(SocketList, socket); //add new socket to list of sockets
+    break;
+    
+case network_type_disconnect:
+    var socket = ds_map_find_value(async_load, "socket"); //get the socket ID
+    var findSocket = ds_list_find_index(SocketList, socket); //find the current socket from the list
+    if(findSocket >= 0)
+    {
+        ds_list_delete(SocketList, findSocket); //let's get rid of that useless socket
+    }
+    break;
+
+case network_type_data:
+    //what information are we receiving/sending?
+    var buffer = ds_map_find_value(async_load, "buffer"); //get packet buffer
+    var socket = ds_map_find_value(async_load, "id"); //get packet ID
+    buffer_seek(buffer, buffer_seek_start, 0); //start read/write at beginning of buffer
+    ReceivedPacket(buffer, socket);
+    break;
+}

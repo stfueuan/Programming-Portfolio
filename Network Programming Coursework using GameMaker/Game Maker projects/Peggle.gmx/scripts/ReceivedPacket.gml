@@ -1,0 +1,54 @@
+var buffer = argument[0];
+var socket = argument[1];
+buffer_seek(buffer, buffer_seek_start, 0);
+var MSGid = buffer_read(buffer, buffer_u8); //get the message ID from the packet
+
+switch(MSGid){
+case 1 : //we gave it a message ID of 1
+    var time = buffer_read(buffer, buffer_u32); //read the time from the buffer
+    buffer_seek(buffer, buffer_seek_start, 0); //start read/write from the beginning of the buffer
+    buffer_write(buffer, buffer_u8, 1); //give new packet an ID of 1
+    buffer_write(buffer, buffer_u32, time); //send client time back to calculate latency
+    buffer_write(buffer, buffer_u32, current_time); //write the time back to the client
+    //socket is used instead of Socket as you want to send data back to the same client
+    //buffer_tell() gets the size of the buffer to be sent
+    network_send_packet(socket, buffer, buffer_tell(buffer)); 
+    break;
+case 2 : //send new peg information
+    //For some reason, the buffer has to be read here before being sent out to the client
+    buffer_read(buffer, buffer_string); //peg name
+    buffer_read(buffer, buffer_u32); //peg x
+    buffer_read(buffer, buffer_u32); //peg y
+    buffer_read(buffer, buffer_bool); //isAlive?
+    buffer_read(buffer, buffer_u32); //current time
+    network_send_packet(socket, buffer, buffer_tell(buffer));
+    break;
+case 3 : //send new ball information
+    buffer_read(buffer, buffer_string); //ball name
+    buffer_read(buffer, buffer_u32); //ball x
+    buffer_read(buffer, buffer_u32); //ball y
+    buffer_read(buffer, buffer_u32); //ball direction
+    buffer_read(buffer, buffer_u32); //ball speed
+    buffer_read(buffer, buffer_u32); //current time
+    network_send_packet(socket, buffer, buffer_tell(buffer));
+    break;
+case 4 : //send dispenser information
+    buffer_read(buffer, buffer_u32); //cannon direction
+    buffer_read(buffer, buffer_u32); //current time
+    network_send_packet(socket, buffer, buffer_tell(buffer));
+    break;
+case 5 : //send collision information
+    buffer_read(buffer, buffer_u32); //ball x
+    buffer_read(buffer, buffer_u32); //ball y
+    buffer_read(buffer, buffer_string); //peg name
+    buffer_read(buffer, buffer_u32); //current time
+    network_send_packet(socket, buffer, buffer_tell(buffer));
+    break;
+case 6 : //send updated ball information (every half a second)
+    buffer_read(buffer, buffer_u32); //ball x
+    buffer_read(buffer, buffer_u32); //ball y
+    buffer_read(buffer, buffer_u32); //ball speed
+    buffer_read(buffer, buffer_u32); //current time
+    network_send_packet(socket, buffer, buffer_tell(buffer));
+    break;
+}

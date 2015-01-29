@@ -1,0 +1,1 @@
+alarm[0] = room_speed/5; //set alarm timer to be half a second - room speed sets the number of frames to be rendered each second

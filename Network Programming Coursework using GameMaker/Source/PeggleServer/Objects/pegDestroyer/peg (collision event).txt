@@ -1,0 +1,19 @@
+with(other)
+{
+    isAlive = false;
+    instance_destroy(); //destroy the peg
+}
+
+buffer = peggleServer.Buffer;
+socketList = peggleServer.SocketList;
+
+buffer_seek(buffer, buffer_seek_start, 0);
+buffer_write(buffer, buffer_u8, 5); //message ID
+buffer_write(buffer, buffer_u32, x); //ball x collision position
+buffer_write(buffer, buffer_u32, y); //ball y collision position
+buffer_write(buffer, buffer_string, object_get_name(other.object_index)); //which peg did you collide with?
+buffer_write(buffer, buffer_u32, current_time); //current server time
+for(var i = 0; i < ds_list_size(socketList); i++)
+{
+    ReceivedPacket(buffer, ds_list_find_value(socketList, i));
+}

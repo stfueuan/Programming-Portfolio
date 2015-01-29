@@ -1,0 +1,3 @@
+pegCollision = true;
+collisionIndex = other.object_index; //get peg index
+collisionCounter++; 

@@ -1,0 +1,3 @@
+//networking doo-hickeys must be cleared up like pointers
+network_destroy(Socket);
+buffer_delete(Buffer);

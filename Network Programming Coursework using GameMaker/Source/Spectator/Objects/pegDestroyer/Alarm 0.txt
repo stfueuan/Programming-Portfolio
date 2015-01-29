@@ -1,0 +1,10 @@
+if(!collisionOccuring)
+{
+    acceleration = (speed - initialSpeed)/0.1; //where 0.1 is the time between predections
+    PositionPredict(acceleration, hspeed, vspeed, x, y); //predict next position - a tenth of a second ahead of where we are now
+    move_towards_point(nextPosX, nextPosY, speed); //interpolation is done linearly using this function
+
+    initialSpeed = speed;
+}
+
+alarm[0] = room_speed/10; //reset alarm timer to be a tenth of a second

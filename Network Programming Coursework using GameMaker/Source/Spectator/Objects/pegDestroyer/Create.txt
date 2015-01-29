@@ -1,0 +1,8 @@
+initialSpeed = 0;
+nextPosX = 0;
+nextPosY = 0;
+collisionOccuring = false;
+pegCollision = false;
+collisionIndex = 0;
+collisionCounter = 0;
+alarm[0] = room_speed/10;

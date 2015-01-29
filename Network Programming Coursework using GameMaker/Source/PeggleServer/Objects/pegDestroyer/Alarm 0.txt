@@ -1,0 +1,15 @@
+var buffer = peggleServer.Buffer;
+var socketList = peggleServer.SocketList;
+
+buffer_seek(buffer, buffer_seek_start, 0); //start writing to buffer from beginning
+buffer_write(buffer, buffer_u8, 6); //message ID
+buffer_write(buffer, buffer_u32, x); //ball x position
+buffer_write(buffer, buffer_u32, y); //ball y position
+buffer_write(buffer, buffer_u32, phy_speed); //ball speed determined by box2D
+buffer_write(buffer, buffer_u32, current_time); //current server time
+for(var i = 0; i < ds_list_size(socketList); i++) //must iterate through list of sockets
+{
+    ReceivedPacket(buffer, ds_list_find_value(socketList, i));
+}
+
+alarm[0] = room_speed/5; //reset alarm timer

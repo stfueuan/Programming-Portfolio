@@ -1,0 +1,15 @@
+//Server creation code taken from this tutorial: http://gmc.yoyogames.com/index.php?showtopic=604116 accessed 29/11/14, written by FatalSheep? 17 December 2013
+
+var Type, Port, MaxClients;
+Type = network_socket_tcp; //set socket type to be TCP
+Port = 5555; //port for server to broadcast from
+MaxClients = 32; //this is how many clients can be connected simultaneously, although more than this can connect
+Server = network_create_server(Type, Port, MaxClients); //create server detailed above
+
+var Size, Type, Alignment;
+Size = 1024; //maximum buffer size
+Type = buffer_fixed; //buffer cannot exceed detailed size
+Alignment = 1; //byte alignment
+Buffer = buffer_create(Size, Type, Alignment);
+
+SocketList = ds_list_create(); //create a list of sockets/clients

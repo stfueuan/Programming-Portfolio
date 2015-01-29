@@ -1,0 +1,24 @@
+//create pegs in following positions and send relevant information to clients
+
+instance_create(64, 160, peg1);
+instance_create(192, 160, peg2);
+instance_create(320, 160, peg3);
+instance_create(448, 160, peg4);
+instance_create(576, 160, peg5);
+instance_create(128, 256, peg6);
+instance_create(256, 256, peg7);
+instance_create(384, 256, peg8);
+instance_create(512, 256, peg9);
+instance_create(576, 352, peg10);
+instance_create(64, 352, peg11);
+instance_create(192, 352, peg12);
+instance_create(320, 352, peg13);
+instance_create(448, 352, peg14);
+
+for(var i = 0; i < ds_list_size(SocketList); i++)
+{
+    for(var j = 1; j < 15; j++)
+    {
+        SendPegInformation(Buffer, "peg" + string(j), ds_list_find_value(SocketList, i));
+    }
+}
