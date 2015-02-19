@@ -1,0 +1,3 @@
+variable seeds
+seeds = 818944
+generate level using seed seeds

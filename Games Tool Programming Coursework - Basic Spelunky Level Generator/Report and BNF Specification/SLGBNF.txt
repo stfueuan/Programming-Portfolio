@@ -1,0 +1,50 @@
+/* 
+	Standard BNF Script Describing Spelunky Level Generating Language
+	This language is free format and case-sensitive
+	Written by Euan Watt 2014 for Module AG0900A, Games Tool Programming.
+*/
+
+/*
+	Problem: I want to generate a Spelunky like level
+	Final language input: Generate level of size 4 x 4 with the start at (3, 0) and the exit at (3, 3). (with seed?)
+	Final output: x x x x 
+				  x x x x
+				  x x x x
+				  x x x x
+*/
+
+<levelGeneratorScript> ::= <declarations> <setList> <generateLevel>;
+
+<generateLevel> :: = generate level <level> | generate level <seededLevel>;
+
+<level> ::= of size <size> | of size <size> with the start at <position> and the exit at <position>;
+
+<size> ::= <expression> x <expression>;
+
+<position> ::= "(" <expression> "," <expression> ")";
+
+<seededLevel> ::= using <seed>;
+
+<seed> ::= <expression>;
+
+<declarations> ::= <declarations> <declaration> | <>;
+
+<declaration> ::= variable <variableList>;
+
+<variableList> ::= id | <variableList> "," id;
+
+<setList> ::= <set> | <setList> <set> | <>;
+
+<set> ::= id "=" <expression>;
+
+<expression> ::= number | id | <expression> "+" <expression> | <expression> "-" <expression> | <expression> "*" <expression> | <expression> "/" <expression> | <expression> "^" <expression>;
+
+
+//The following is taken from GenVal.BNF, written by Alan Milne (c), 2010, 26 October 2011.
+microsyntax
+// patterns are in Lex format.
+
+// note that the optional sign has been removed from numbers as this is ambiguous with arithmetic expressions; added as a unary minus operator.
+number <|[0-9]+("."[0-9]+)?
+
+id <|[a-zA-Z][a-zA-Z0-9]*
