@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|PSVita">
+      <Configuration>Debug</Configuration>
+      <Platform>PSVita</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|PSVita">
+      <Configuration>Release</Configuration>
+      <Platform>PSVita</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C5733C16-E744-4E3F-BF7F-337BB1EA1F78}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|PSVita'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|PSVita'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|PSVita'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|PSVita'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|PSVita'">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>..\ar_vita;..\abertay_framework;..\abertay_framework\external</AdditionalIncludeDirectories>
+      <CppLanguageStd>Cpp11</CppLanguageStd>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>-lSceFios2_stub;-lSceDbg_stub;-lSceGxm_stub;-lSceDisplay_stub;-lSceCtrl_stub;-lSceSysmodule_stub;-lSceNgs_stub_weak;-lSceAudio_stub;-lSceTouch_stub;-lSceRazorCapture_stub</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|PSVita'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <OptimizationLevel>Level2</OptimizationLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>..\ar_vita;..\abertay_framework;..\abertay_framework\external</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>-lSceFios2_stub;-lSceGxm_stub;-lSceDisplay_stub;-lSceCtrl_stub;-lSceSysmodule_stub;-lSceNgs_stub_weak;-lSceAudio_stub;-lSceTouch_stub</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ar_app.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="controller_input.cpp" />
+    <ClCompile Include="gameObject.cpp" />
+    <ClCompile Include="LiveFeed.cpp" />
+    <ClCompile Include="main_vita.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ar_app.h" />
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="controller_input.h" />
+    <ClInclude Include="gameObject.h" />
+    <ClInclude Include="LiveFeed.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\abertay_framework\abertay_framework.vcxproj">
+      <Project>{001d0f7f-2fa7-461e-82bf-808b1baacf98}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\abertay_framework\external\libpng\libpng.vcxproj">
+      <Project>{76a1fc3e-ab2b-46f6-b821-f64bc62ff7e5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\abertay_framework\external\zlib\zlib.vcxproj">
+      <Project>{11c7c0e1-0103-46a9-8e41-3caf058cbe8f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ar_vita\ar_vita.vcxproj">
+      <Project>{3487d4f2-7a74-491b-941e-bd808e0bd12f}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Condition="'$(ConfigurationType)' == 'Makefile' and Exists('$(VCTargetsPath)\Platforms\$(Platform)\SCE.Makefile.$(Platform).targets')" Project="$(VCTargetsPath)\Platforms\$(Platform)\SCE.Makefile.$(Platform).targets" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
