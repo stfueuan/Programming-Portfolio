@@ -50,27 +50,32 @@ void GSGeometryShader (point GeometryInputType input[1], inout TriangleStream<Ge
 	texCoord[2] = float2(0, 0); //bottom left
 	texCoord[3] = float2(1, 0); //bottom right
 
-	//get the direction vector from the input points position to the camera's position
-	float3 vnormal = cameraPosition - input[0].position.xyz;
-	vnormal = normalize(vnormal);
-	
+	//https://www.youtube.com/watch?v=R78pWR-WCMo
+	// Compute the local coordinate system of the sprite relative to the world
+	// space such that the billboard is aligned with the y-axis and faces the eye.
+	float3 up = float3(0.0f, 1.0f, 0.0f);
+	float3 look = cameraPosition - input[0].position;
+	look.y = 0.0f; // reinstate this if you don't want spheres to track camera in y plane
+	look = normalize(look);
+	float3 left = cross(up, look);
+
 	// Get world position of point position - this is done first so the generated quad will always update relative to your position
 	float4 worldPosition = mul(input[0].position, worldMatrix);
 
-	// Geneate a quad relative to the points world position, worldMatrix of course is based on cameras current position
-	float3 posit[4];
-	posit[3] = worldPosition + g_positions[0];
-	posit[2] = worldPosition + g_positions[1];
-	posit[1] = worldPosition + g_positions[2];
-	posit[0] = worldPosition + g_positions[3];
-	
-	for(int i = 0; i < 4; i++)
+	float4 bottomLeft = float4(worldPosition + g_positions[3].x * -left + g_positions[3].y * up, 1.0f);
+	float4 topLeft = float4(worldPosition + g_positions[2].x * -left + g_positions[2].y * up, 1.0f);
+	float4 bottomRight = float4(worldPosition + g_positions[1].x * -left + g_positions[1].y * up, 1.0f);
+	float4 topRight = float4(worldPosition + g_positions[0].x * -left + g_positions[0].y * up, 1.0f);
+
+	float4 v[4] = { bottomLeft, topLeft, bottomRight, topRight };
+
+	for (int i = 0; i < 4; i++)
 	{
-		float3 vposition = posit[i];
-		output.position = mul(float4(vposition,1.0), viewMatrix);
-		output.position = mul(output.position, projectionMatrix); 
+		float3 vposition = v[i];
+		output.position = mul(float4(vposition, 1.0), viewMatrix);
+		output.position = mul(output.position, projectionMatrix);
 		output.tex = texCoord[i];
-		output.normal = vnormal;
+		output.normal = look;
 		triStream.Append(output);
 	}
 
